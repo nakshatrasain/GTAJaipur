@@ -156,6 +156,6 @@
     sh.querySelector('#x').onclick = U.closeSheet;
     sh.querySelector('#snd').onclick = e => { J.audio.on = !J.audio.on; e.target.textContent = J.audio.on ? 'Sound: on' : 'Sound: off'; };
     sh.querySelector('#mus').onclick = e => { J.audio.setMusic(!J.audio.music); e.target.textContent = J.audio.music ? 'Music: on' : 'Music: off'; };
-    sh.querySelector('#restart').onclick = () => { if (confirm('Start a new game? Your progress will reset.')) { U.closeSheet(); J.newGame(J.state.name); } };
+    sh.querySelector('#restart').onclick = e => { if (e.target.dataset.sure) { U.closeSheet(); J.newGame(J.state.name); } else { e.target.dataset.sure = 1; e.target.textContent = 'Tap again to reset progress'; } };
   };
 })(window.J);
