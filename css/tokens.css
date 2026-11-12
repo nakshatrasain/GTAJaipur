@@ -1,0 +1,40 @@
+/* Gulabi Town Adventures — design tokens. Every UI value reads from here. */
+:root{
+  /* colour */
+  --c-bg:#2A1620;            /* plum night (title / overlays) */
+  --c-surface-1:#FFF6EC;     /* cream card */
+  --c-surface-2:#F6E4D2;     /* sandstone inset */
+  --c-text:#2B1B17;
+  --c-text-2:#5C4038;
+  --c-muted:#8F7268;
+  --c-accent:#F2A41C;        /* marigold — the ONE accent: objectives, primary buttons */
+  --c-pink:#E0846F;          /* pink city sandstone */
+  --c-pink-deep:#B85C4C;
+  --c-indigo:#263170;
+  --c-success:#3F8F5A;
+  --c-warning:#E07B1A;
+  --c-error:#C2413B;
+  --c-scrim:rgba(42,22,32,.72);
+
+  /* type: one display, one text face, scale 1.25 */
+  --font-display:'Rozha One',Georgia,'Times New Roman',serif;
+  --font-text:'Mukta',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fs-xs:12px; --fs-sm:13px; --fs-base:16px; --fs-md:20px; --fs-lg:25px; --fs-xl:31px; --fs-2xl:39px; --fs-3xl:61px;
+
+  /* spacing: 4pt scale */
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:48px;
+
+  /* radius (concentric: outer = inner + padding) */
+  --r-sm:6px; --r-md:12px; --r-lg:20px; --r-full:999px;
+  --r-arch:999px 999px var(--r-md) var(--r-md); /* jharokha arch */
+
+  /* elevation — one light source, top-left */
+  --e-1:2px 3px 0 rgba(43,27,23,.18);
+  --e-2:4px 6px 16px rgba(43,27,23,.22);
+  --e-3:8px 12px 32px rgba(43,27,23,.32);
+
+  /* motion */
+  --t-fast:120ms; --t-base:200ms; --t-slow:320ms;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-reduced-motion:reduce){ :root{ --t-fast:0ms; --t-base:0ms; --t-slow:0ms; } }

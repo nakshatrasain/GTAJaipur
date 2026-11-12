@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#2A1620">
+<title>Gulabi Town Adventures — Jaipur</title>
+<meta name="description" content="A tiny open-city driving adventure set in Jaipur, the Pink City. Kachori, chai, coffee, autos and Hawa Mahal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;800&family=Rozha+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/ui.css">
+</head>
+<body>
+<canvas id="game" aria-label="Game view"></canvas>
+
+<div id="hud" hidden>
+  <div id="mission" class="card" hidden>
+    <div class="eyebrow" id="m-ch"></div>
+    <div class="title" id="m-title"></div>
+    <div class="obj" id="m-obj"></div>
+    <div class="timer" id="m-timer" hidden></div>
+  </div>
+  <div id="stats">
+    <div class="pill" id="money">₹0</div>
+    <div class="pill"><span id="clock">7:40 AM</span></div>
+    <div class="pill" title="Josh — eat to refill"><span>Josh</span><div class="josh"><i id="josh"></i></div></div>
+    <div class="pill" id="stars" title="Challan level"></div>
+    <div class="pill" id="vehname" hidden></div>
+  </div>
+  <div id="topbtns">
+    <button class="icon-btn" id="b-map" aria-label="Map">Map</button>
+    <button class="icon-btn" id="b-diary" aria-label="Jaipur Diary">Diary</button>
+    <button class="icon-btn" id="b-pause" aria-label="Pause">II</button>
+  </div>
+  <canvas id="minimap" width="336" height="336"></canvas>
+  <div id="prompt" class="card" hidden></div>
+  <div id="toasts"></div>
+  <div id="banner"><div class="big"></div><div class="small"></div></div>
+</div>
+
+<div id="dialog" class="card" hidden>
+  <div class="portrait" id="d-portrait"></div>
+  <div>
+    <div class="who"><span id="d-who"></span><span class="call" id="d-call" hidden>ON CALL</span></div>
+    <div class="line" id="d-line"></div>
+    <div class="next"><span class="key">Space</span> / tap to continue</div>
+  </div>
+</div>
+
+<div id="overlay" class="overlay" hidden><div class="sheet" id="sheet"></div></div>
+
+<div id="touch" hidden>
+  <div id="joy"><i></i></div>
+  <div id="tbtns">
+    <button id="t-horn">Horn</button>
+    <button id="t-act" class="act">E</button>
+    <button id="t-brake">Brake</button>
+    <button id="t-rev">Rev</button>
+  </div>
+</div>
+
+<div id="title">
+  <canvas id="title-art"></canvas>
+  <div class="logo"><span class="gta">GTA</span><span class="sub">Gulabi Town Adventures · Jaipur</span></div>
+  <p class="tag">Kachori. Chai. Coffee. Chaos. Padharo mhare des.</p>
+  <div class="row" style="justify-content:center">
+    <input id="pname" maxlength="14" value="Kabir" aria-label="Your name">
+    <button class="btn btn-primary" id="b-new">New Game</button>
+    <button class="btn btn-ghost" id="b-cont" hidden>Continue</button>
+  </div>
+  <div class="controls"><span class="tc">Joystick to drive or walk · <span class="key">E</span> enter, exit, interact · Brake · Horn</span><span class="kb">
+    <span class="key">W A S D</span> / <span class="key">Arrows</span> drive &nbsp;·&nbsp; <span class="key">Space</span> handbrake &nbsp;·&nbsp; <span class="key">E</span> enter / exit / interact<br>
+    <span class="key">H</span> horn &nbsp;·&nbsp; <span class="key">M</span> map &nbsp;·&nbsp; <span class="key">J</span> Jaipur Diary &nbsp;·&nbsp; <span class="key">Shift</span> run</span>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/map.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/world.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/missions.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
