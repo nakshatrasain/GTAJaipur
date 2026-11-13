@@ -151,11 +151,11 @@
 
   U.openPause = function () {
     const sh = U.openSheet(`<div class="eyebrow">Paused</div><h2>Chai break</h2>
-      <p><span class="key">WASD</span> drive · <span class="key">Space</span> handbrake · <span class="key">E</span> enter, exit, interact · <span class="key">H</span> horn · <span class="key">M</span> map · <span class="key">J</span> diary · <span class="key">Shift</span> run</p>
+      <p><b>Walking:</b> <span class="key">W</span><span class="key">S</span> forward/back, <span class="key">A</span><span class="key">D</span> turn, <span class="key">Shift</span> run.<br><b>Driving:</b> <span class="key">W</span> accelerate, <span class="key">S</span> brake/reverse, <span class="key">A</span><span class="key">D</span> steer, <span class="key">Space</span> handbrake, <span class="key">H</span> horn.<br><span class="key">E</span> get in, get off, eat, talk · drag to look · <span class="key">C</span> look back · <span class="key">M</span> map · <span class="key">J</span> diary</p>
       <div class="row end"><button class="btn btn-ghost" id="snd">${J.audio.on ? 'Sound: on' : 'Sound: off'}</button><button class="btn btn-ghost" id="mus">${J.audio.music ? 'Music: on' : 'Music: off'}</button><button class="btn btn-ghost" id="restart">New game</button><button class="btn btn-primary" id="x">Resume</button></div>`, 'pause');
     sh.querySelector('#x').onclick = U.closeSheet;
     sh.querySelector('#snd').onclick = e => { J.audio.on = !J.audio.on; e.target.textContent = J.audio.on ? 'Sound: on' : 'Sound: off'; };
     sh.querySelector('#mus').onclick = e => { J.audio.setMusic(!J.audio.music); e.target.textContent = J.audio.music ? 'Music: on' : 'Music: off'; };
-    sh.querySelector('#restart').onclick = e => { if (e.target.dataset.sure) { U.closeSheet(); J.newGame(J.state.name); } else { e.target.dataset.sure = 1; e.target.textContent = 'Tap again to reset progress'; } };
+    sh.querySelector('#restart').onclick = e => { if (e.target.dataset.sure) { U.closeSheet(); J.newGame(J.state.name, J.state.look); } else { e.target.dataset.sure = 1; e.target.textContent = 'Tap again to reset progress'; } };
   };
 })(window.J);

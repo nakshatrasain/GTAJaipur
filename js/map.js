@@ -34,6 +34,8 @@
     fill(30, 9, 70, 18, G); fill(55, 19, 75, 28, G);
     fill(114, 120, 124, 128, HILL); fill(114, 129, 115, 134, HILL); fill(122, 129, 124, 134, HILL);
     fill(84, 14, 108, 32, WATER);
+    fill(38, 13, 52, 17, WATER); // Maota Lake below Amer
+    M.lakes = [[84, 14, 108, 32], [38, 13, 52, 17]];
     fill(70, 92, 97, 103, PARK); fill(72, 120, 96, 139, PARK);
     for (let x = 38; x <= 118; x++) { set(x, 38, WALL); set(x, 82, WALL); }
     for (let y = 38; y <= 82; y++) { set(38, y, WALL); set(118, y, WALL); }

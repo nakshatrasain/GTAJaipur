@@ -160,59 +160,17 @@
       }
       s4();
     };
-    // stage 4: sip
+    // stage 4: sit by the window and sip, in 3D
     const s4 = () => {
-      const verdict = score >= 3 ? '“That’s a 9/10, yaar. You sure you were in Bangalore and not in a coffee estate?”' : score >= 2 ? '“Solid. Come back on a Sunday, I’ll show you the roaster.”' : '“Every great barista started with a sad cup. This is your sad cup.”';
-      const sh = sheet(`<div class="eyebrow">Window seat · ${esc(drink.name)}</div><h2>Ishaan: ${esc(verdict)}</h2><canvas class="art" width="800" height="400"></canvas><p id="thought">Tap the cup to sip.</p><div class="row end"><button class="btn btn-primary" id="sip">Sip (Space)</button></div>`);
-      const c = sh.querySelector('canvas').getContext('2d'); let sips = 0, meera = false;
-      const thoughts = ['Okay. This is very, very good.', 'Pink walls outside, golden light inside. Jaipur really did grow up.', meet ? 'Someone slides into the chair across from you. Paint on their fingers, sketchbook full of arches.' : 'Five years away and this city still knows how to slow you down.'];
-      loop(t => { D.cafeArt(c, 800, 400, t, 'seat'); c.fillStyle = '#8A5A3B'; c.fillRect(0, 300, 800, 100); D.food(c, drink.id === 'cold' ? 'lassi' : 'coffee', 400, 330, 70, null);
-        if (meera) { c.fillStyle = '#7A5BA6'; D.rr(c, 560, 150, 110, 160, [50, 50, 8, 8]); c.fill(); c.fillStyle = '#B47650'; c.beginPath(); c.arc(615, 130, 30, 0, 7); c.fill(); c.fillStyle = '#2B1B17'; c.beginPath(); c.arc(615, 118, 32, Math.PI, 0); c.fill(); c.fillRect(583, 118, 10, 46); c.fillRect(637, 118, 10, 46); c.fillStyle = '#F6F1E7'; D.rr(c, 580, 240, 70, 50, 4); c.fill(); }
-        c.fillStyle = 'rgba(255,255,255,.55)'; for (let i = 0; i < 3 - Math.min(3, sips); i++) { c.beginPath(); c.ellipse(390 + i * 12, 240 - ((t * 30 + i * 20) % 60), 4, 10, 0, 0, 7); c.fill(); } });
-      const sip = () => {
-        if (sips >= 3) return finish(); sips++; J.audio.pour();
-        sh.querySelector('#thought').textContent = thoughts[sips - 1];
-        if (sips === 3 && meet) meera = true;
-        if (sips >= 3) sh.querySelector('#sip').textContent = meet ? 'Say hi to Meera' : 'Head back out';
-      };
-      const finish = () => { J.state.josh = Math.min(100, J.state.josh + 45); stamp('curious'); J.ui.toast('+45 Josh', 'Caffeinated in the Pink City'); close(res); };
-      sh.querySelector('#sip').onclick = sip; sh.querySelector('canvas').onclick = sip;
-      J.sceneKey = (e, d) => { if (d && e.code === 'Space') { e.preventDefault(); sip(); } };
+      const verdict = score >= 3 ? 'Ishaan: “That’s a 9/10, yaar.”' : score >= 2 ? 'Ishaan: “Solid. Come back Sunday, I’ll show you the roaster.”' : 'Ishaan: “Every great barista started with a sad cup.”';
+      stop(); U.closeSheet(); J.ui.toast(verdict, 'Carry your cup outside and sit.');
+      J.meal.start({ place: 'curious', paid: true, companion: meet ? 'meera' : 'ishaan', food: { item: drink.name, price: 0, josh: 45, dish: drink.id === 'cold' ? 'iced' : 'coffee', serve: 'ceramic' } }).then(() => res());
     };
     s1();
   });
 
-  // ---------- eat at a food stop ----------
-  S.eat = (opts) => new Promise(res => {
-    const p = J.PLACE[opts.place], f = p.food;
-    const sh = sheet(`<div class="eyebrow">${esc(p.name)}</div><h2>${esc(f.item)}</h2><canvas class="art" width="800" height="380"></canvas><p>“${esc(f.line)}”</p><div class="feedback" id="fb"></div>
-      <div class="row end">${opts.mission ? '' : '<button class="btn btn-ghost" id="no">Maybe later</button>'}<button class="btn btn-primary" id="buy">Buy · ₹${f.price}</button></div>`);
-    const cv = sh.querySelector('canvas'), c = cv.getContext('2d'), fb = sh.querySelector('#fb');
-    let bites = null, pops = [];
-    loop(t => {
-      c.fillStyle = '#A87449'; c.fillRect(0, 0, 800, 380); c.fillStyle = 'rgba(0,0,0,.06)'; for (let i = 0; i < 800; i += 40) c.fillRect(i, 0, 2, 380);
-      c.fillStyle = 'rgba(255,240,200,.18)'; c.beginPath(); c.moveTo(0, 0); c.lineTo(300, 0); c.lineTo(800, 380); c.lineTo(450, 380); c.fill();
-      D.food(c, f.art, 400, 190, 130, bites);
-      if (!bites || bites.length < 4) { c.strokeStyle = 'rgba(255,255,255,.5)'; c.lineWidth = 3; for (let i = 0; i < 3; i++) { c.beginPath(); const sx = 360 + i * 40; c.moveTo(sx, 60); c.bezierCurveTo(sx - 12, 40 - Math.sin(t * 2 + i) * 8, sx + 12, 20, sx, 0); c.stroke(); } }
-      c.font = '800 28px Mukta'; c.textAlign = 'center';
-      pops = pops.filter(q => (q.t -= 1 / 60) > 0); pops.forEach(q => { c.globalAlpha = Math.min(1, q.t * 2); c.fillStyle = '#FFF6EC'; c.fillText(q.s, q.x, q.y - (1 - q.t) * 40); c.globalAlpha = 1; });
-    });
-    const bite = () => {
-      if (!bites) return; if (bites.length >= 4) return done();
-      const spots = [[.85, -.5], [-.8, -.6], [.7, .7], [-.6, .8]]; bites.push(spots[bites.length]); J.audio.crunch();
-      pops.push({ s: ['Crunch!', 'Mmm!', 'Wah!', 'Ek aur?'][bites.length - 1], x: 400 + spots[bites.length - 1][0] * 160, y: 190 + spots[bites.length - 1][1] * 100, t: 1 });
-      if (bites.length >= 4) { sh.querySelector('#buy').textContent = 'Wipe hands, back to the road'; fb.textContent = `+${f.josh} Josh · stamped in your Jaipur Diary`; }
-    };
-    const done = () => { J.state.josh = Math.min(100, J.state.josh + f.josh); stamp(p.id); J.ui.toast(f.item, p.fact); close(res, true); };
-    sh.querySelector('#buy').onclick = () => {
-      if (bites) return bite();
-      if (!pay(f.price)) fb.textContent = '“Paise nahi? Koi baat nahi, agli baar de dena, beta.”';
-      bites = []; sh.querySelector('#buy').textContent = 'Take a bite (Space)'; const no = sh.querySelector('#no'); if (no) no.remove();
-    };
-    cv.onclick = bite;
-    const no = sh.querySelector('#no'); if (no) no.onclick = () => close(res, false);
-    J.sceneKey = (e, d) => { if (d && e.code === 'Space') { e.preventDefault(); sh.querySelector('#buy').click(); } };
-  });
+  // ---------- eat at a food stop: handled in 3D by J.meal ----------
+  S.eat = (opts) => J.meal.start({ place: opts.place, companion: opts.companion || (opts.mission ? { usual: 'meera', doppler: 'chintu', samrat: null }[opts.place] : null) });
 
   // ---------- block-print mural at JKK ----------
   S.art = () => new Promise(res => {

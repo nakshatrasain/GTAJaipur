@@ -39,6 +39,8 @@
   <canvas id="minimap" width="336" height="336"></canvas>
   <div id="prompt" class="card" hidden></div>
   <div id="toasts"></div>
+  <div id="speedo" class="card" hidden><b>0</b><span>km/h</span><div class="bar"><i></i></div><small></small></div>
+  <div id="drivehelp" class="card" hidden></div>
   <div id="banner"><div class="big"></div><div class="small"></div></div>
 </div>
 
@@ -50,6 +52,8 @@
     <div class="next"><span class="key">Space</span> / tap to continue</div>
   </div>
 </div>
+
+<div id="mealbar" class="card" hidden></div>
 
 <div id="overlay" class="overlay" hidden><div class="sheet" id="sheet"></div></div>
 
@@ -67,10 +71,16 @@
   <canvas id="title-art"></canvas>
   <div class="logo"><span class="gta">GTA</span><span class="sub">Gulabi Town Adventures · Jaipur</span></div>
   <p class="tag">Kachori. Chai. Coffee. Chaos. Padharo mhare des.</p>
-  <div class="row" style="justify-content:center">
-    <input id="pname" maxlength="14" value="Kabir" aria-label="Your name">
-    <button class="btn btn-primary" id="b-new">New Game</button>
-    <button class="btn btn-ghost" id="b-cont" hidden>Continue</button>
+  <div class="start card">
+    <label for="pname" class="eyebrow">What should Jaipur call you?</label>
+    <input id="pname" maxlength="14" placeholder="Type your name" autocomplete="off" aria-describedby="name-hint">
+    <div class="eyebrow" style="margin-top:12px">Pick your look</div>
+    <div id="looks" class="looks"></div>
+    <p id="name-hint" class="hint">Your name shows up in every conversation.</p>
+    <div class="row" style="justify-content:center">
+      <button class="btn btn-primary" id="b-new">Start in Jaipur</button>
+      <button class="btn btn-ghost" id="b-cont" hidden>Continue</button>
+    </div>
   </div>
   <div class="controls"><span class="tc">Joystick to drive or walk · drag the city to look around · <span class="key">E</span> enter, exit, interact</span><span class="kb">
     <span class="key">W A S D</span> / <span class="key">Arrows</span> drive &nbsp;·&nbsp; <span class="key">Space</span> handbrake &nbsp;·&nbsp; <span class="key">E</span> enter / exit / interact<br>
@@ -84,10 +94,12 @@
 <script src="js/draw.js"></script>
 <script src="js/map.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/models.js"></script>
 <script src="js/world.js"></script>
 <script src="js/city3d.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/scenes.js"></script>
+<script src="js/meal.js"></script>
 <script src="js/missions.js"></script>
 <script src="js/main.js"></script>
 </body>

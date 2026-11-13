@@ -20,13 +20,31 @@ Then visit http://localhost:8000. It also works on GitHub Pages: set Pages to de
 | Drag the mouse | Look around |
 | `C` | Look behind |
 | `Space` | Handbrake (drift!) |
-| `E` | Get in or out of a vehicle, interact, eat |
+| `E` | Get in or off a vehicle, pick up a fallen bike, walk in to eat, talk |
 | `H` | Horn (pom pom) |
 | `M` / `J` | Map / Jaipur Diary |
 | `Shift` | Run |
 | `Esc` | Pause |
 
 On phones you get an on-screen joystick plus E, Horn, Brake and Rev buttons.
+
+## Eating
+
+Food is a sit-down moment, not a menu. Park, walk in, and you're seated at the table in first person with a friend across from you. The plate arrives: crisp pyaaz kachori with imli and hari chutney, kulhad chai with bun maska, lassi topped with malai, ghewar, kesar kulfi, or a latte with a heart on top. Press Space to bite (crunch, crumbs fly) or sip (slurp, then "aah"), and B for the bun maska. Your friend chats while you eat.
+
+| Dish | Where |
+|---|---|
+| Pyaaz kachori | Samrat, Rawat |
+| Aloo kachori | Sampat Namkeen Bhandar |
+| Ghewar | LMB |
+| Kulhad lassi | Lassiwala |
+| Chai + bun maska | Gulab Ji Chai, Tapri Central |
+| Kesar kulfi | Pandit Kulfi |
+| Coffee | Curious Life (brew it yourself), Half Light, The Usual, Doppler, Rustic by OTH |
+
+## Driving
+
+A speedometer and a how-to card appear when you first get in. Two-wheelers lean into turns, cars pitch when braking, autos rattle, and the camera shakes more on rough ground. Hit something above about 45 km/h on two wheels and you come off: your character is thrown, the bike falls on its side, and you press E to pick it up. Knock into another rider and they go down too.
 
 ## The story: 8 chapters
 
@@ -48,6 +66,9 @@ The real places were checked against public listings (Nov 2026). The map is stil
 | Place | Where it really is |
 |---|---|
 | Curious Life Coffee Roasters | C-54A Sarojini Marg, Panch Batti, C-Scheme |
+| Half Light Coffee Roasters | F-31 Azad Marg, C-Scheme |
+| Rustic by OTH | C-Scheme |
+| Pandit Kulfi | Hawa Mahal Bazaar |
 | Samrat (pyaaz kachori since 1965) | Chaura Rasta, walled city |
 | Sampat Namkeen Bhandar (aloo kachori since 1936) | Kishanpole Bazaar |
 | Rawat Mishthan Bhandar | Station Road, opposite Polo Victory, Sindhi Camp |

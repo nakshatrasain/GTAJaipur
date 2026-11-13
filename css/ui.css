@@ -134,3 +134,31 @@ body.touch #prompt{bottom:180px}
   .sheet{padding:var(--s-4)}
   #topbtns{top:auto;bottom:168px;left:auto;right:var(--s-4);transform:none;flex-direction:column}
 }
+
+/* title: name + look */
+#title .start{width:min(440px,100%);padding:var(--s-4) var(--s-5);display:flex;flex-direction:column;gap:var(--s-2);text-align:left}
+#title .start input{width:100%;text-align:left;background:var(--c-surface-2)}
+#title .start input.need{outline:3px solid var(--c-error)}
+#title .hint{font-size:var(--fs-sm);color:var(--c-text-2);margin:0}
+.looks{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-2)}
+.lookbtn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:var(--s-2);border-radius:var(--r-md);background:var(--c-surface-2);min-height:44px;font-size:var(--fs-xs);font-weight:800}
+.lookbtn i{display:block;width:28px;height:14px;border-radius:var(--r-sm) var(--r-sm) 0 0}
+.lookbtn i+i{border-radius:0 0 var(--r-sm) var(--r-sm);height:12px;width:22px}
+.lookbtn.sel{outline:3px solid var(--c-accent);background:var(--c-surface-1)}
+#title .tag{margin:var(--s-2) 0 var(--s-4)}
+/* driving */
+#speedo{position:absolute;left:50%;bottom:var(--s-4);transform:translateX(-50%);display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:var(--s-1);padding:var(--s-2) var(--s-4);min-width:140px}
+#speedo b{font-family:var(--font-display);font-size:var(--fs-2xl);line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
+#speedo span{font-weight:800;font-size:var(--fs-sm);color:var(--c-text-2)}
+#speedo .bar{grid-column:1/-1;height:6px}
+#speedo .bar i{background:var(--c-accent);transition:width var(--t-fast) linear}
+#speedo small{grid-column:1/-1;font-weight:800;font-size:var(--fs-xs);color:var(--c-muted);letter-spacing:.08em;text-transform:uppercase}
+#drivehelp{position:absolute;left:var(--s-4);top:50%;transform:translateY(-50%);width:min(300px,80vw);padding:var(--s-3) var(--s-4);font-size:var(--fs-sm);line-height:1.7;animation:toastIn var(--t-slow) var(--ease)}
+#drivehelp ul{list-style:none;margin:var(--s-1) 0}
+#drivehelp p{color:var(--c-text-2);line-height:1.4}
+body.touch #speedo{bottom:auto;top:var(--s-4)}
+body.touch #drivehelp{top:auto;bottom:200px;transform:none}
+/* meal */
+#mealbar{position:fixed;left:50%;bottom:var(--s-5);transform:translateX(-50%);display:flex;flex-wrap:wrap;gap:var(--s-4);align-items:center;justify-content:space-between;width:min(720px,calc(100vw - 32px));padding:var(--s-3) var(--s-4);z-index:3;pointer-events:auto}
+#mealbar b{font-family:var(--font-display);font-size:var(--fs-lg);font-weight:400}
+#mealbar .btn .key{margin-left:var(--s-1)}

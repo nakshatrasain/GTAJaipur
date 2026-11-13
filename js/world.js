@@ -57,10 +57,25 @@
     if (!hits(v, nx, v.y, v.a)) { v.x = nx; v.vy *= .2; v.v *= .8; }
     else if (!hits(v, v.x, ny, v.a)) { v.y = ny; v.vx *= .2; v.v *= .8; }
     else { v.v *= -.3; v.vx *= -.3; v.vy *= -.3; }
-    if (v.driver === 'player' && imp > 140) { J.audio.thud(); J.view.shake = Math.min(10, imp / 45); }
+    if (v.driver === 'player') { if (imp > 140) { J.audio.thud(); shake(imp / 45); } if (imp > 175) Wd.crash(v, imp); }
   }
+  function shake(x) { if (J.r3) J.r3.shake = Math.max(J.r3.shake || 0, Math.min(1.4, x / 12)); }
+  Wd.kmh = v => Math.round(Math.abs(v) * .25);
+  Wd.crash = function (v, imp) {
+    if (Wd.time - (Wd.lastCrash || -9) < 1.2) return; Wd.lastCrash = Wd.time;
+    const P = Wd.player, VT = J.VEH[v.type], kmh = Wd.kmh(imp);
+    J.audio.crash(); shake(16);
+    if ((VT.two && imp > 175) || (v.type === 'auto' && imp > 240)) {
+      v.fallen = !!VT.two; v.driver = null; v.parked = true; v.v = 0; v.vx = v.vy = 0; v.keep = true; P.veh = null;
+      let tx = v.x + Math.cos(v.a) * 26, ty = v.y + Math.sin(v.a) * 26; if (M.solidAt(tx, ty)) { tx = v.x + Math.cos(v.a + 1.57) * 14; ty = v.y + Math.sin(v.a + 1.57) * 14; }
+      if (M.solidAt(tx, ty)) { tx = v.x; ty = v.y; }
+      P.x = tx; P.y = ty; P.a = v.a; P.down = 2.8; P.spin = (Math.random() - .5) * 1.2; P.moving = false;
+      J.state.josh = Math.max(0, J.state.josh - 8);
+      J.ui.toast(VT.two ? 'Gir gaye!' : 'Thrown out of the auto!', `You hit something at ${kmh} km/h and came off. Dust yourself off, then press E to pick it up.`);
+    } else if (imp > 230) J.ui.toast('Dhadaam!', `${kmh} km/h into a wall. The bumper will remember this.`);
+  };
   function drive(v, c, dt) {
-    const VT = J.VEH[v.type];
+    const VT = J.VEH[v.type], v0 = v.v;
     const sf = M.surface(M.tileAt(v.x, v.y), VT.offroad);
     const maxV = VT.maxV * sf * (v.driver === 'player' && J.state.josh < 15 ? .85 : 1);
     if (c.thr > 0) v.v += (v.v < 0 ? VT.brake : VT.acc) * c.thr * dt;
@@ -75,6 +90,7 @@
     if (hits(v, v.x, v.y, v.a) && !hits(v, v.x, v.y, oldA)) v.a = oldA;
     const tx = Math.cos(v.a) * v.v, ty = Math.sin(v.a) * v.v, k = Math.min(1, (c.brake ? 1.5 : VT.grip) * dt);
     v.vx += (tx - v.vx) * k; v.vy += (ty - v.vy) * k;
+    v.steer = c.steer; v.accel = (v.v - v0) / Math.max(dt, .001);
     move(v, dt);
   }
   Wd.drive = drive;
@@ -162,7 +178,7 @@
       const p = mkPed(v.x + Math.cos(v.a + 1.57) * 18, v.y + Math.sin(v.a + 1.57) * 18); p.col = v.rider; Wd.peds.push(p);
       Wd.say(p, pick(J.JACKED), 2.6); Wd.addStar(1, 'Bina puche gaadi?');
     }
-    v.driver = 'player'; v.ai = null; v.parked = false; v.keep = true; v.v = 0;
+    v.driver = 'player'; v.ai = null; v.parked = false; v.keep = true; v.v = 0; v.fallen = false;
     Wd.vehicles.forEach(o => { if (o !== v && o.keep && !o.mission) o.keep = false; });
     P.veh = v; J.audio.click();
   };
@@ -253,7 +269,8 @@
     manageT -= dt; if (manageT <= 0) { manageT = .5; manage(); }
 
     // player
-    if (P.veh) {
+    if (P.down > 0) { P.down -= dt; P.moving = false; if (P.down <= 0) J.ui.toast('Back on your feet', 'Haath-pair sab theek hai.'); }
+    else if (P.veh) {
       const v = P.veh; let ctl;
       if (inp.joy.active && inp.joy.mag > .15) {
         const ja = joyWorld(inp), diff = angDiff(ja, v.a), back = Math.abs(diff) > 2.3;
@@ -299,13 +316,19 @@
         pv.x -= nx * ov * (1 - heavy); pv.y -= ny * ov * (1 - heavy);
         const sp = Math.abs(pv.v);
         if (o.goon && Wd.time - (o.cool || 0) > .6 && sp > 70) {
-          o.cool = Wd.time; o.hits++; o.stunned = .8; J.audio.thud(); J.view.shake = 8;
+          o.cool = Wd.time; o.hits++; o.stunned = .8; J.audio.thud(); shake(8);
           Wd.say(o, ['Arre! Gaadi mat thok!', 'Bunty bhaisaab maarenge!', 'Bas karo!'][Math.min(2, o.hits - 1)]);
         } else if (sp > 110 && Wd.time - (o.hitT || 0) > 1) {
-          o.hitT = Wd.time; o.stunned = 1.2; J.audio.thud(); J.view.shake = 5; Wd.say(o, pick(J.SHOUTS));
+          o.hitT = Wd.time; o.stunned = 1.2; J.audio.thud(); shake(5); Wd.say(o, pick(J.SHOUTS));
           if (o.police) Wd.addStar(1, 'You hit Traffic Mamu!');
+          if (J.VEH[o.type].two && o.driver === 'ai' && !o.police) {
+            // their rider goes down too
+            const rp2 = mkPed(o.x + nx * 18, o.y + ny * 18); rp2.down = 2.8; rp2.spin = Math.random(); Wd.peds.push(rp2); Wd.say(rp2, pick(['Aaai! Meri gaadi!', 'Dekh ke chala bhai!', 'Oye!']), 2.4);
+            o.fallen = true; o.driver = null; o.ai = null; o.parked = true; o.v = 0;
+          }
+          if (VP.two && sp > 175) Wd.crash(pv, sp);
         }
-        if (o.chaser && Wd.time - (o.hitT || 0) > 1) { o.hitT = Wd.time; Wd.say(o, pick(['Ruk ja!', 'Kachori humein de!', 'Bunty bhaisaab ka order hai!'])); pv.vx += nx * -120; pv.vy += ny * -120; J.view.shake = 6; }
+        if (o.chaser && Wd.time - (o.hitT || 0) > 1) { o.hitT = Wd.time; Wd.say(o, pick(['Ruk ja!', 'Kachori humein de!', 'Bunty bhaisaab ka order hai!'])); pv.vx += nx * -120; pv.vy += ny * -120; shake(6); }
         if (sp > 70) pv.v *= .55;
       }
     }
@@ -319,7 +342,7 @@
       if (Math.random() < dt * .08) p.a = pick([0, Math.PI / 2, Math.PI, -Math.PI / 2]);
       if (pv) {
         const d = dist(p, pv), r = J.VEH[pv.type].l * .5;
-        if (d < r && Math.abs(pv.v) > 80) { p.down = 2.4; p.spin = Math.random() * 6; p.x += Math.cos(pv.a) * 14; p.y += Math.sin(pv.a) * 14; Wd.say(p, pick(['Aaaai!', 'Mummyyy!', 'Andha hai kya?!', 'Oye!']), 2); Wd.addStar(1, 'Pedestrian down! (they’ll be fine)'); J.audio.thud(); }
+        if (d < r && Math.abs(pv.v) > 80) { p.down = 2.4; p.spin = Math.random() * 6; p.x += Math.cos(pv.a) * 14; p.y += Math.sin(pv.a) * 14; Wd.say(p, pick(['Aaaai!', 'Mummyyy!', 'Andha hai kya?!', 'Oye!']), 2); Wd.addStar(1, 'Pedestrian down! (they’ll be fine)'); J.audio.thud(); shake(4); }
         else if (d < r + 16 && Math.abs(pv.v) > 20) { p.x -= Math.sin(pv.a) * 30 * dt; p.y += Math.cos(pv.a) * 30 * dt; }
       }
     }
@@ -332,7 +355,7 @@
       const o = pv || P, d = dist(k, o), r = pv ? J.VEH[pv.type].l * .45 + 11 : 12;
       if (d < r && d > .01) {
         const nx = (o.x - k.x) / d, ny = (o.y - k.y) / d;
-        if (pv) { pv.x += nx * (r - d); pv.y += ny * (r - d); if (Math.abs(pv.v) > 100) { J.audio.moo(); Wd.say(k, 'MOOO.', 2); Wd.addStar(1, 'Gau Mata ko takkar?! Sharam karo.'); J.view.shake = 6; } pv.v *= .3; }
+        if (pv) { pv.x += nx * (r - d); pv.y += ny * (r - d); if (Math.abs(pv.v) > 100) { J.audio.moo(); Wd.say(k, 'MOOO.', 2); Wd.addStar(1, 'Gau Mata ko takkar?! Sharam karo.'); shake(6); } pv.v *= .3; }
         else { P.x += nx * (r - d); P.y += ny * (r - d); if (Math.random() < .01) { J.audio.moo(); Wd.say(k, 'Moo.'); } }
       }
     }

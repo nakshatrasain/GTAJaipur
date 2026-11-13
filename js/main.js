@@ -6,7 +6,7 @@
   J.view = { x: 0, y: 0, zoom: .7, shake: 0 };
   J.modal = 'title';
   const SAVE = 'gta-jaipur-v2';
-  const defaults = name => ({ name: name || 'Kabir', ch: 0, step: 0, money: 200, josh: 80, diary: {}, time: 7.66, stars: 0, introCh: -1, pigments: [] });
+  const defaults = (name, look) => ({ look: look || 'kurta', name: name || 'Kabir', ch: 0, step: 0, money: 200, josh: 80, diary: {}, time: 7.66, stars: 0, introCh: -1, pigments: [] });
   J.state = defaults();
   let dpr = 1;
 
@@ -32,7 +32,7 @@
     const b = $('b-new'), c = $('b-cont'); b.textContent = 'Building Jaipur…'; b.disabled = c.disabled = true;
     setTimeout(() => { J.r3.init(cv); J.r3built = true; fn(); }, 40);
   }
-  J.newGame = function (name) { withCity(() => { J.state = defaults(name); J.world.reset(); begin(); J.save(); }); };
+  J.newGame = function (name, look) { withCity(() => { J.state = defaults(name, look); J.world.reset(); begin(); J.save(); }); };
   function continueGame(sv) {
     withCity(() => {
       J.state = Object.assign(defaults(sv.name), sv, { stars: 0 }); J.world.reset(); J.loadArt();
@@ -53,6 +53,7 @@
   addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT') { if (e.code === 'Enter') $('b-new').click(); return; }
     if (J.modal === 'scene') { if (J.sceneKey) J.sceneKey(e, true); return; }
+    if (J.modal === 'meal') { J.meal.key(e, true); return; }
     if (J.modal === 'dialog') { if (['Space', 'Enter', 'KeyE'].includes(e.code) && !e.repeat) { e.preventDefault(); J.ui.dialogNext(); } return; }
     if (J.modal && J.modal !== 'title' && J.modal !== 'cine') { if (['Escape', 'KeyM', 'KeyJ', 'KeyP'].includes(e.code)) J.ui.closeSheet(); return; }
     if (J.modal) return;
@@ -119,7 +120,8 @@
       setTimeout(() => $('fade').classList.add('on'), 1250);
       setTimeout(() => {
         J.r3.endCine(); walkIn = null; J.modal = null;
-        rawOpen(name, opts).then(r => { setTimeout(() => $('fade').classList.remove('on'), 60); res(r); });
+        setTimeout(() => $('fade').classList.remove('on'), 350);
+        rawOpen(name, opts).then(r => res(r));
       }, 1600);
     });
   };
@@ -164,13 +166,41 @@
     const v = J.world.player.veh;
     if (v) J.audio.engine(Math.min(1, Math.abs(v.v) / J.VEH[v.type].maxV), v.type, true); else J.audio.engine(0, 'car', false);
     J.audio.tick();
+    drivingHud(v, dt);
     let pr = J.missions.prompt();
     if (!pr) pr = J.missions.needText() ? null : (placeAction() || {}).text;
-    if (!pr && !v) { const nv = J.world.nearestVehicle(); if (nv) pr = `Get on the ${J.VEH[nv.type].name}${nv.driver === 'ai' ? ' (they won’t like it)' : ''}`; }
+    if (!pr && !v && !(J.world.player.down > 0)) { const nv = J.world.nearestVehicle(); if (nv) pr = nv.fallen ? `Pick up the ${J.VEH[nv.type].name}` : `Get on the ${J.VEH[nv.type].name}${nv.driver === 'ai' ? ' (they won’t like it)' : ''}`; }
     const need = J.missions.needText();
     J.ui.prompt(pr || need);
     if (need && !pr) $('prompt').innerHTML = J.ui.esc(need);
   }
+
+  // ---------------- speedometer + how-to-drive card ----------------
+  let lastVeh = null, helpT = 0;
+  function drivingHud(v, dt) {
+    const sp = $('speedo');
+    sp.hidden = !v;
+    if (v) {
+      const kmh = J.world.kmh(v.v); sp.querySelector('b').textContent = kmh;
+      sp.querySelector('i').style.width = Math.min(100, kmh / 1.1) + '%';
+      sp.querySelector('small').textContent = v.v < -5 ? 'REVERSE' : J.VEH[v.type].name;
+    }
+    if (v && v !== lastVeh) {
+      let seenN = 0; try { seenN = +localStorage.getItem('gtaj-drivehelp') || 0; } catch (e) {}
+      if (seenN < 3) { showDriveHelp(v); try { localStorage.setItem('gtaj-drivehelp', seenN + 1); } catch (e) {} }
+    }
+    lastVeh = v;
+    if (helpT > 0) { helpT -= dt; if (helpT <= 0) $('drivehelp').hidden = true; }
+  }
+  function showDriveHelp(v) {
+    const two = v && J.VEH[v.type].two, touch = document.body.classList.contains('touch');
+    $('drivehelp').innerHTML = `<div class="eyebrow">How to drive${v ? ' · ' + J.ui.esc(J.VEH[v.type].name) : ''}</div>` + (touch
+      ? '<ul><li><b>Joystick</b>: point it where you want to go</li><li><b>Brake</b>: slow down · <b>Rev</b>: reverse</li><li><b>E</b>: get off · <b>Horn</b>: pom pom</li><li>Drag the city to look around</li></ul>'
+      : '<ul><li><span class="key">W</span> accelerate · <span class="key">S</span> brake, then reverse</li><li><span class="key">A</span> <span class="key">D</span> steer · <span class="key">Space</span> handbrake (drift)</li><li><span class="key">E</span> get off · <span class="key">H</span> horn · <span class="key">C</span> look back</li></ul>')
+      + `<p>${two ? 'Crash above ~45 km/h on two wheels and you will come off. Wear the helmet, go easy in the galis.' : 'Cows have right of way. Always.'}</p>`;
+    $('drivehelp').hidden = false; helpT = 9;
+  }
+  J.showDriveHelp = showDriveHelp;
 
   // ---------------- overlay: labels, name tags, bubbles, arrow ----------------
   function pill(text, x, y, dark, alpha) {
@@ -186,7 +216,7 @@
     c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
     c.textAlign = 'center'; c.textBaseline = 'middle';
     const P = J.world.pos();
-    const near = J.PLACES.map(p => [p, Math.hypot(p.dx - P.x, p.dy - P.y) / 8]).filter(([, d]) => d < 120 && d > 14).sort((a, b) => a[1] - b[1]).slice(0, 6);
+    const near = J.PLACES.map(p => [p, Math.hypot(p.dx - P.x, p.dy - P.y) / 8]).filter(([, d]) => d < 120 && d > 14).sort((a, b) => a[1] - b[1]).slice(0, J.modal === 'meal' ? 0 : 4);
     for (const [p, d] of near) {
       const lx = p.kind === 'spot' ? p.dx : p.cxp, ly = p.kind === 'spot' ? p.dy : p.cyp;
       const s = J.r3.project(lx, ly, p.kind === 'spot' ? 9 : 6 + (p.hgt || 0) * .36 + 4); if (!s.on) continue;
@@ -195,7 +225,7 @@
     for (const n of J.r3.npcs) { if (n.x === undefined) continue; const d = Math.hypot(n.x - P.x, n.y - P.y) / 8; if (d > 45) continue; const s = J.r3.project(n.x, n.y, 2.5); if (s.on) pill(n.name, s.x, s.y, false, Math.min(1, (45 - d) / 10)); }
     c.font = '700 13px Mukta, sans-serif';
     for (const b of J.world.bubbles) {
-      const s = J.r3.project(b.o.x, b.o.y, 3); if (!s.on) continue;
+      const s = J.r3.project(b.o.x, b.o.y, b.o.bh || 3); if (!s.on) continue;
       const w = c.measureText(b.text).width + 18, x = s.x, y = s.y;
       c.globalAlpha = Math.min(1, b.t * 3);
       c.fillStyle = '#FFF6EC'; J.draw.rr(c, x - w / 2, y - 12, w, 24, 12); c.fill();
@@ -245,8 +275,16 @@
     tctx.fillStyle = 'rgba(42,22,32,.35)'; tctx.fillRect(0, h * .55, w, h * .45);
   }
   const sv = load();
-  if (sv && sv.name) { $('b-cont').hidden = false; $('pname').value = sv.name; $('b-cont').textContent = `Continue as ${sv.name}`; }
-  $('b-new').onclick = () => { J.audio.init(); J.newGame(($('pname').value || 'Kabir').trim().slice(0, 14) || 'Kabir'); };
+  if (sv && sv.name) { $('b-cont').hidden = false; $('b-cont').textContent = `Continue as ${sv.name}`; }
+  let look = 'kurta';
+  const lp = $('looks');
+  lp.innerHTML = Object.entries(J.LOOKS).map(([k, l]) => `<button class="lookbtn${k === look ? ' sel' : ''}" data-k="${k}" aria-label="${l.label}"><i style="background:${l.top}"></i><i style="background:${l.bottom}"></i><span>${l.label}</span></button>`).join('');
+  lp.querySelectorAll('button').forEach(b => b.onclick = () => { look = b.dataset.k; lp.querySelectorAll('button').forEach(x => x.classList.toggle('sel', x === b)); });
+  $('b-new').onclick = () => {
+    const nm = ($('pname').value || '').trim().slice(0, 14);
+    if (!nm) { $('pname').focus(); $('pname').classList.add('need'); $('name-hint').textContent = 'Type your name first. Jaipur wants to know who’s visiting.'; return; }
+    J.audio.init(); J.newGame(nm, look);
+  };
   $('b-cont').onclick = () => { J.audio.init(); continueGame(load()); };
   if (isTouch) $('touch').hidden = true;
   setInterval(() => { if (isTouch) $('touch').hidden = !!J.modal; }, 250);
