@@ -66,9 +66,16 @@
     for (const p of J.PLACES) {
       if (p.kind === 'spot') { p.dx = (p.cx + .5) * T; p.dy = (p.cy + .5) * T; continue; }
       fill(p.x, p.y, p.x + p.w - 1, p.y + p.h - 1, LM);
-      const row = p.face === 'n' ? p.y - 1 : p.y + p.h;
-      for (let x = p.x; x < p.x + p.w; x++) if (get(x, row) !== ROAD) set(x, row, PLAZA);
-      const d = p.door || [p.x + p.w / 2, row + .5];
+      let d;
+      if (p.face === 'e' || p.face === 'w') {
+        const col = p.face === 'w' ? p.x - 1 : p.x + p.w;
+        for (let y = p.y; y < p.y + p.h; y++) if (get(col, y) !== ROAD) set(col, y, PLAZA);
+        d = p.door || [col + .5, p.y + p.h / 2];
+      } else {
+        const row = p.face === 'n' ? p.y - 1 : p.y + p.h;
+        for (let x = p.x; x < p.x + p.w; x++) if (get(x, row) !== ROAD) set(x, row, PLAZA);
+        d = p.door || [p.x + p.w / 2, row + .5];
+      }
       p.dx = d[0] * T; p.dy = d[1] * T;
       p.cxp = (p.x + p.w / 2) * T; p.cyp = (p.y + p.h / 2) * T;
     }
@@ -153,13 +160,15 @@
       case MONU: c.fillStyle = '#7FAE5F'; c.fillRect(px, py, T, T); break;
     }
   }
-  function renderChunk(cx, cy) {
+  M.CS = CS; M.CPX = CPX;
+  M.renderChunk = (cx, cy) => renderChunk(cx, cy, true);
+  function renderChunk(cx, cy, noTrees) {
     const cv = document.createElement('canvas'); cv.width = cv.height = CPX;
     const c = cv.getContext('2d');
     for (let y = 0; y < CS; y++) for (let x = 0; x < CS; x++) { const tx = cx * CS + x, ty = cy * CS + y; drawTile(c, get(tx, ty), tx, ty, x * T, y * T); }
     // trees (flat crowns, light top-left)
     c.save(); c.translate(-cx * CPX, -cy * CPX);
-    for (const t of M.trees) {
+    for (const t of noTrees ? [] : M.trees) {
       if (t.x < cx * CPX - 30 || t.x > (cx + 1) * CPX + 30 || t.y < cy * CPX - 30 || t.y > (cy + 1) * CPX + 30) continue;
       c.fillStyle = 'rgba(52,26,18,.22)'; c.beginPath(); c.arc(t.x + t.r * .45, t.y + t.r * .35, t.r, 0, 7); c.fill();
       c.fillStyle = '#5E8C46'; c.beginPath(); c.arc(t.x, t.y, t.r, 0, 7); c.fill();

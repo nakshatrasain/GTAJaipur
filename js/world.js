@@ -8,6 +8,10 @@
   const angDiff = (a, b) => { let d = a - b; while (d > Math.PI) d -= 6.2832; while (d < -Math.PI) d += 6.2832; return d; };
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   Wd.angDiff = angDiff;
+  function joyWorld(inp) { // joystick is relative to the 3D camera
+    const a = J.camA || 0, jx = Math.cos(inp.joy.angle), jy = Math.sin(inp.joy.angle);
+    return Math.atan2(Math.sin(a) * -jy + Math.cos(a) * jx, Math.cos(a) * -jy - Math.sin(a) * jx);
+  }
   let nid = 1;
 
   const SKINS = ['#C68B62', '#B47650', '#D9A07A', '#9A6342', '#E0B08C'];
@@ -26,7 +30,7 @@
   Wd.reset = function () {
     Wd.vehicles = []; Wd.peds = []; Wd.cows = []; Wd.bubbles = []; Wd.police = []; Wd.monkeys = [];
     const st = J.PLACE.station;
-    Wd.player = { x: st.dx, y: st.dy - 4, a: Math.PI / 2, veh: null, walk: 0, skin: '#C68B62', col: '#F2A41C', hair: '#2B1B17' };
+    Wd.player = { x: st.dx + 30, y: st.dy + 20, a: 0, veh: null, walk: 0, skin: '#C68B62', col: '#F2A41C', hair: '#2B1B17' };
     // parked vehicles along kerbs
     const R = (() => { let s = 99; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
     for (let y = 1; y < M.H - 1; y++) for (let x = 1; x < MW - 1; x++) {
@@ -214,7 +218,7 @@
   Wd.clearMission = function () { Wd.vehicles = Wd.vehicles.filter(v => !(v.goon || v.chaser) || v === Wd.player.veh); };
 
   // ---------------- spawning ----------------
-  function viewR() { return Math.hypot(innerWidth, innerHeight) / 2 / J.view.zoom + 60; }
+  function viewR() { return J.r3 && J.r3.mobile ? 850 : 1100; }
   function manage() {
     const P = Wd.pos(), vr = viewR();
     Wd.vehicles = Wd.vehicles.filter(v => v.parked || v.keep || v.driver === 'player' || v.police || dist(v, P) < vr + 1100);
@@ -229,7 +233,7 @@
       v.ai = { kind: 'traffic', cruise: J.VEH[type].maxV * rnd(.42, .6) * (walled ? .8 : 1) };
       placeOnRoad(v, t.x, t.y); Wd.vehicles.push(v);
     }
-    for (let i = Wd.peds.length; i < 34; i++) { const t = M.randomTile([TL.SIDE, TL.PLAZA], P.x, P.y, vr - 40, vr + 400); if (t) Wd.peds.push(mkPed((t.x + .5) * T, (t.y + .5) * T)); }
+    for (let i = Wd.peds.length; i < (J.r3 && J.r3.mobile ? 14 : 26); i++) { const t = M.randomTile([TL.SIDE, TL.PLAZA], P.x, P.y, vr - 40, vr + 400); if (t) Wd.peds.push(mkPed((t.x + .5) * T, (t.y + .5) * T)); }
     for (let i = Wd.cows.length; i < 9; i++) { const t = M.randomTile([TL.ROAD, TL.G, TL.SIDE], P.x, P.y, vr, vr + 600); if (t) Wd.cows.push({ x: (t.x + .5) * T, y: (t.y + .5) * T, a: Math.random() * 6.28, seed: Math.random() * 9, t: rnd(2, 8), walking: false, col: pick(['#EFE9DF', '#E8DCC8', '#F4F0E8']), patch: pick(['#8A5A3B', '#4A3A30', '#B9AE9C']), mala: Math.random() < .3 }); }
     // police
     const S = J.state, want = Math.min(4, S.stars);
@@ -252,20 +256,21 @@
     if (P.veh) {
       const v = P.veh; let ctl;
       if (inp.joy.active && inp.joy.mag > .15) {
-        const diff = angDiff(inp.joy.angle, v.a), back = Math.abs(diff) > 2.3;
+        const ja = joyWorld(inp), diff = angDiff(ja, v.a), back = Math.abs(diff) > 2.3;
         ctl = { thr: inp.rev ? -1 : back && v.v < 30 ? -inp.joy.mag : inp.joy.mag, steer: clamp((back ? -diff : diff) * 2, -1, 1), brake: inp.brake };
       } else ctl = { thr: inp.rev ? -1 : (inp.up ? 1 : 0) - (inp.down ? 1 : 0), steer: (inp.right ? 1 : 0) - (inp.left ? 1 : 0), brake: inp.brake };
       drive(v, ctl, dt);
-      P.x = v.x; P.y = v.y;
+      P.x = v.x; P.y = v.y; P.moving = false;
     } else {
-      let mx = (inp.right ? 1 : 0) - (inp.left ? 1 : 0), my = (inp.down ? 1 : 0) - (inp.up ? 1 : 0);
-      if (inp.joy.active && inp.joy.mag > .15) { mx = Math.cos(inp.joy.angle) * inp.joy.mag; my = Math.sin(inp.joy.angle) * inp.joy.mag; }
-      const m = Math.hypot(mx, my);
-      if (m > 0) {
-        const sp = (inp.run || inp.brake ? 160 : 90) / Math.max(1, m);
-        const nx = P.x + mx * sp * dt, ny = P.y + my * sp * dt;
+      let fwd = 0;
+      if (inp.joy.active && inp.joy.mag > .15) { const ja = joyWorld(inp); P.a += angDiff(ja, P.a) * Math.min(1, dt * 12); fwd = inp.joy.mag; }
+      else { P.a += ((inp.right ? 1 : 0) - (inp.left ? 1 : 0)) * 3.2 * dt; fwd = (inp.up ? 1 : 0) - (inp.down ? .6 : 0); }
+      P.moving = Math.abs(fwd) > .05;
+      if (P.moving) {
+        const sp = (inp.run || inp.brake ? 85 : 44) * fwd;
+        const nx = P.x + Math.cos(P.a) * sp * dt, ny = P.y + Math.sin(P.a) * sp * dt;
         if (!M.solidAt(nx, P.y)) P.x = nx; if (!M.solidAt(P.x, ny)) P.y = ny;
-        P.a = Math.atan2(my, mx); P.walk += dt * 12;
+        P.walk += dt * (inp.run || inp.brake ? 14 : 9) * Math.sign(fwd);
       }
     }
 

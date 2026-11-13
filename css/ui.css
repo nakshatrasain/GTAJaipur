@@ -1,6 +1,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--c-bg);color:var(--c-text);font-family:var(--font-text);font-size:var(--fs-base);-webkit-user-select:none;user-select:none;touch-action:none}
-#game{position:fixed;inset:0;display:block}
+#game{position:fixed;inset:0;display:block;width:100%;height:100%;touch-action:none}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#fade{position:fixed;inset:0;background:var(--c-bg);opacity:0;pointer-events:none;transition:opacity var(--t-slow) var(--ease);z-index:4}
+#fade.on{opacity:1}
 [hidden]{display:none!important}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 button:focus-visible{outline:3px solid var(--c-accent);outline-offset:2px}

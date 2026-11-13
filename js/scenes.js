@@ -253,7 +253,7 @@
       ['narrator', 'Nahargarh. 6:12 PM. The whole city is a sheet of pink below you.'],
       ['dadi', 'Aa gaya mera sher! Kachori garam hai? Haan, garam hai.'],
       ['meera', 'Your mural is on every poster. Look. Even the posters are pink.'],
-      ['chintu', 'Bhai, Bulabchi, LMB, Lassiwala... sab aa gaye. Line Amer tak jaa rahi hai.'],
+      ['chintu', 'Bhai, Samrat, Sampat, LMB, Lassiwala... sab aa gaye. Line Amer tak jaa rahi hai.'],
       ['bunty', 'Ahem. Yeh fest band karo, warna... (sniff) ...yeh kya khushboo hai?'],
       ['dadi', 'Tere Dadaji ki recipe. Kha. Phir bolna “kachori ka zamana gaya.”'],
       ['bunty', '...Ek aur milegi? Aur haan, lounge cancel. Kachori Corner rehne do.'],
